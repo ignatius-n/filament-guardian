@@ -859,7 +859,9 @@ Guardian discovers RelationManagers natively. If your relation manager has neith
 
 ### 1. Auto-discovery
 
-When you run `php artisan guardian:policies`, the command walks each registered Resource's `getRelations()` and offers eligible relation managers alongside resources. `php artisan guardian:sync` syncs their permissions automatically, with no extra flag needed.
+When you run `php artisan guardian:policies`, the command walks each registered Resource's `getRelations()` **and** the overridden `getAllRelationManagers()` on every page using Filament's `HasRelationManagers` concern (`ViewRecord`, `EditRecord`, `ManageRelatedRecords`, and any custom page using the concern), then offers eligible relation managers alongside resources. Both registration sites are supported; results are deduplicated by relation manager class. `php artisan guardian:sync` syncs their permissions automatically, with no extra flag needed.
+
+> **Page-level overrides:** when a page overrides `getAllRelationManagers()` to scope relation managers to that page only — a common Filament pattern (View-page-only, Edit-page-only, or any page-specific subset) — Guardian discovers them via reflection on a stub page instance. Pages that depend on runtime state (e.g. `$this->record`) during this method are silently skipped — they can't be reached without an owner record.
 
 A relation manager is **skipped** when ANY of these is true:
 
